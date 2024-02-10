@@ -91,6 +91,7 @@ function App() {
         </Heading>
         <Center>
           <Input
+            placeholder="Enter character name"
             value={character}
             onChange={(e) => {
               clearData();
