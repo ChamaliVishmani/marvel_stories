@@ -46,17 +46,13 @@ function App() {
         );
       }
       if (data.data.results[0].stories.available > 0) {
-        console.log(data.data.results[0].stories.items);
         const stories = data.data.results[0].stories.items;
         stories.forEach((story) => {
-          console.log(story.name);
-          console.log(story.resourceURI);
           getStoryData(story.resourceURI);
         });
       }
       if (data.attributionText) {
         setAttributionText(data.attributionText);
-        console.log(data.attributionText);
       }
     } catch (error) {
       console.error("Error:", error);
@@ -68,8 +64,6 @@ function App() {
     try {
       const response = await fetch(url);
       const data = await response.json();
-      console.log(data.data.results[0].title);
-      console.log(data.data.results[0].description);
       setStories((prev) => [
         ...prev,
         {
@@ -113,18 +107,23 @@ function App() {
 
         {searched && (
           <Card>
-            <CardHeader>
-              {attributionText && (
-                <Tag marginEnd={"auto"}>{attributionText}</Tag>
-              )}
-              <Heading
-                textTransform="uppercase"
-                fontSize="medium"
-                marginTop="20px"
-              >
-                {character}
-              </Heading>
-            </CardHeader>
+            <Center>
+              <CardHeader>
+                {attributionText && (
+                  <Tag marginEnd={"auto"}>{attributionText}</Tag>
+                )}
+                <Center>
+                  <Heading
+                    textTransform="uppercase"
+                    fontSize="medium"
+                    marginTop="20px"
+                  >
+                    {character}
+                  </Heading>
+                </Center>
+              </CardHeader>
+            </Center>
+
             <CardBody>
               {charImage && (
                 <Image
