@@ -1,4 +1,4 @@
-import "./App.css";
+import { useState } from "react";
 import CryptoJS from "crypto-js";
 import {
   Box,
@@ -6,6 +6,7 @@ import {
   Card,
   CardBody,
   CardHeader,
+  Center,
   ChakraProvider,
   Container,
   Heading,
@@ -13,15 +14,19 @@ import {
   Input,
   Stack,
   StackDivider,
+  Tag,
   Text,
 } from "@chakra-ui/react";
+
 import { MARVEL_PUBLIC_KEY, MARVEL_PRIVATE_KEY } from "./config";
-import { useState } from "react";
 
 function App() {
   const [character, setCharacter] = useState();
   const [charImage, setCharImage] = useState();
   const [stories, setStories] = useState([]);
+  const [searched, setSearched] = useState(false);
+  const [attributionText, setAttributionText] = useState();
+
   const ts = new Date().getTime().toString();
   const dataToHash = ts + MARVEL_PRIVATE_KEY + MARVEL_PUBLIC_KEY;
   const hash = CryptoJS.MD5(dataToHash).toString();
@@ -32,6 +37,7 @@ function App() {
     try {
       const response = await fetch(url);
       const data = await response.json();
+      setSearched(true);
       if (data.data.results[0].thumbnail.path) {
         setCharImage(
           data.data.results[0].thumbnail.path +
@@ -47,6 +53,10 @@ function App() {
           console.log(story.resourceURI);
           getStoryData(story.resourceURI);
         });
+      }
+      if (data.attributionText) {
+        setAttributionText(data.attributionText);
+        console.log(data.attributionText);
       }
     } catch (error) {
       console.error("Error:", error);
@@ -72,40 +82,73 @@ function App() {
     }
   };
 
+  const clearData = () => {
+    setCharacter("");
+    setCharImage("");
+    setStories([]);
+    setSearched(false);
+  };
+
   return (
     <ChakraProvider>
-      <Container>
+      <Container alignContent="center">
         <Heading as="h1" size="2xl" textAlign="center" margin="2rem">
           Marvel Stories
         </Heading>
-        <Input
-          value={character}
-          onChange={(e) => setCharacter(e.target.value)}
-        ></Input>
-        <Button onClick={() => getCharacter(character)}>Search</Button>
-        <Card>
-          <CardHeader>
-            <Heading textTransform="uppercase">{character}</Heading>
-          </CardHeader>
-          <CardBody>
-            <Image boxSize="200px" src={charImage} alt="Character" />
-            <Stack divider={<StackDivider />}>
-              {stories.length > 0 &&
-                stories.map((story, index) => (
-                  <Box key={index}>
-                    <Heading>{story.title}</Heading>
-                    <Text>{story.description}</Text>
-                  </Box>
-                ))}
-            </Stack>
-          </CardBody>
-          {/* {stories.map((story, index) => (
-            <CardBody key={index}>
-              <Heading>{story.title}</Heading>
-              <p>{story.description}</p>
+        <Center>
+          <Input
+            value={character}
+            onChange={(e) => {
+              clearData();
+              setCharacter(e.target.value);
+            }}
+          ></Input>
+          <Button
+            onClick={() => getCharacter(character)}
+            colorScheme={"yellow"}
+          >
+            Search
+          </Button>
+        </Center>
+
+        {searched && (
+          <Card>
+            <CardHeader>
+              {attributionText && (
+                <Tag marginEnd={"auto"}>{attributionText}</Tag>
+              )}
+              <Heading
+                textTransform="uppercase"
+                fontSize="medium"
+                marginTop="20px"
+              >
+                {character}
+              </Heading>
+            </CardHeader>
+            <CardBody>
+              {charImage && (
+                <Image
+                  boxSize="200px"
+                  src={charImage}
+                  alt="Character"
+                  borderRadius="full"
+                  margin="auto"
+                  marginBlockEnd={4}
+                />
+              )}
+
+              <Stack divider={<StackDivider />} spacing="4">
+                {stories.length > 0 &&
+                  stories.map((story, index) => (
+                    <Box key={index}>
+                      <Heading size="xs">{story.title}</Heading>
+                      <Text fontSize="sm">{story.description}</Text>
+                    </Box>
+                  ))}
+              </Stack>
             </CardBody>
-          ))} */}
-        </Card>
+          </Card>
+        )}
       </Container>
     </ChakraProvider>
   );
